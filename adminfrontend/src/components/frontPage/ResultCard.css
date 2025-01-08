@@ -1,0 +1,60 @@
+.result-card {
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+.dob-input {
+  border: 1px solid #ccc;
+  padding: 5px;
+  width: 150px;
+}
+
+.result-info {
+  margin-bottom: 20px;
+}
+
+.result-info-columns {
+  display: flex;
+  justify-content: space-between;
+}
+
+.result-info-column {
+  width: 48%; /* Adjust the width as needed */
+}
+
+.result-info-row {
+  margin-bottom: 10px;
+  
+}
+.result-info-row *{
+  margin-left:30px;
+}
+
+.result-info label {
+  font-weight: bold;
+  margin-right: 5px;
+}
+
+.result-table {
+  width: 100%;
+  border-collapse: collapse;
+  border: 1px solid #ccc;
+  margin-top: 20px;
+}
+
+.result-table th,
+.result-table td {
+  border: 1px solid #ccc;
+  padding: 8px;
+  text-align: center;
+}
+
+.sgpa-row {
+  background-color: #f0f0f0;
+}
+
+.sgpa-label {
+  font-weight: bold;
+}
