@@ -5,11 +5,13 @@ import axios from 'axios'; // Import Axios
 import NavBar from '../NavBar';
 import { HOST } from '../constants';
 import CheckResult from './CheckResult';
+import SelectSession from '../SelectSession';
 
-const AdminFrontPage = ({setData , setFrontPage}) => {
+const AdminFrontPage = ({setData , setFrontPage , setSelectedSession , selectedSession}) => {
 
 
   const [uploadFilePage , setUploadFilePage] = useState(true);
+  
 
   const handleFile = (data, fileName) => {
     if (fileName.endsWith('.xlsx') || fileName.endsWith('.xls')) {
@@ -19,7 +21,7 @@ const AdminFrontPage = ({setData , setFrontPage}) => {
       if(csvData){
         console.log('CSV Data we are Getting : \n', csvData)
         // Send CSV data to backend using Axios
-        axios.post(`${HOST}/addFile`, { 'data' : csvData })
+        axios.post(`${HOST}/addFile`, { 'data' : csvData})
           .then(response => {
             console.log('Data taken from CSV File :', response.data);
             setData(response.data);
@@ -64,11 +66,14 @@ const AdminFrontPage = ({setData , setFrontPage}) => {
       height: '100vh',
       display: 'flex',
       alignItems: 'center',
-      justifyContent: 'center'
+      justifyContent: 'center',
+      display:'flex',
+      flexDirection:'column'
     }}>
       <NavBar uploadFilePage={uploadFilePage} setUploadFilePage={setUploadFilePage}/>
+      <SelectSession setSession = {setSelectedSession} />
       {uploadFilePage && <FileUpload handleFile={handleFile} />}
-      {!uploadFilePage && <CheckResult />}
+      {!uploadFilePage && <CheckResult selectedSession = {selectedSession}/>}
     </div>
   );
 };

@@ -3,7 +3,7 @@ const cors = require('cors')
 const bodyParser = require('body-parser')
 const {readCSV , transformData , createTable , connectDatabase } = require('./src/database/dataFunctions')
 const {insertResults} = require('./src/database/insertResults')
-const {getDataMiddleware, getDataExamination, updateDateOfBirth} = require('./src/database/getData');
+const {getDataMiddleware, getDataExamination, updateDateOfBirth, getResultSessions, addResultSessions} = require('./src/database/getData');
 const { checkConnection } = require('./src/database/dataBaseConnection');
 const { backupFunction } = require("./src/database/backupDatabase");
 
@@ -47,12 +47,16 @@ app.post('/addFile', async (req, res, next) => {
 app.post('/addResult' , async (req, res, next) =>{
     try {
         const results = req.body;
-        insertResults(results)
+        
+        insertResults(results.data , results.session);
         res.status(200).send("Sucessfull")
     } catch (error) {
         next(error);
     }
 })
+
+app.get('/getSessions',getResultSessions)
+app.post('/addSession',addResultSessions)
 
 app.get('/:pass',async (req,res,next) =>{
     try{
@@ -68,8 +72,9 @@ app.get('/:pass',async (req,res,next) =>{
 })
 
 
-app.get('/examination/:RegNo' , getDataExamination);
 app.post('/examination/updateDateOfBirth' , updateDateOfBirth);
+app.post('/examination/:RegNo' , getDataExamination);
+
 
 // Catch-all route
 app.get('*', (req, res) => {
@@ -77,12 +82,12 @@ app.get('*', (req, res) => {
 });
 
 // Create server
-backupFunction();
+// backupFunction();
 
-app.listen(process.env.PORT, '192.168.124.197', () => {
-    console.log(`Server is running on http://192.168.124.197:${process.env.PORT}`);
-});
-
-// app.listen(process.env.PORT, () => {
-//     console.log(`Server is running on http://localhost:${process.env.PORT}`);
+// app.listen(process.env.PORT, '192.168.124.197', () => {
+//     console.log(`Server is running on http://192.168.124.197:${process.env.PORT}`);
 // });
+
+app.listen(process.env.PORT, () => {
+    console.log(`Server is running on http://localhost:${process.env.PORT}`);
+});

@@ -13,9 +13,9 @@ const pool = mysql.createPool({
     queueLimit: 0
 });
 
-const createTable = async () => {
+exports.createTable = async (table_name) => {
     // Create 'result' table if it doesn't exist
-    const createTableQuery = `CREATE TABLE IF NOT EXISTS result(
+    const createTableQuery = `CREATE TABLE IF NOT EXISTS ${table_name}(
         enrollment_no VARCHAR(255) NOT NULL PRIMARY KEY,
         student_name VARCHAR(255) NOT NULL,
         college VARCHAR(255) NOT NULL,
@@ -34,7 +34,7 @@ const createTable = async () => {
 
     try {
         const [result] = await pool.query(createTableQuery);
-        console.log('Table "result" created or already exists');
+        console.log(`Table ${table_name} created or already exists`);
     } catch (err) {
         console.error('Error creating table:', err);
     }
@@ -45,7 +45,6 @@ exports.checkConnection = async () => {
         const connection = await pool.getConnection();
         console.log('Connected to MySQL database');
         connection.release(); // Release the connection back to the pool
-        await createTable();
     } catch (err) {
         console.error('Error connecting to MySQL database:', err);
         throw err; // Throw error to terminate application or handle appropriately

@@ -1,12 +1,14 @@
 import  {  useEffect, useState } from 'react';
 import logo from '../assets/images/Ct_logo.png';
 import axios from 'axios'
+import SelectSession from './SelectSession';
 
 const FrontPage = ({setFrontPage , setCertificateData}) => {
     const [rollNo , setRollNo] = useState('');
     const [dob , setDOB] = useState('');
     const [msg , setMessage] = useState('Fill the Data Properly')
     const [trigger , setTrigger] = useState(false);
+    const [session,setSession] = useState("");
 
     const handleDate = (date) =>{
       const [y , m ,d] = date.split(/[\/.-]/);
@@ -15,8 +17,10 @@ const FrontPage = ({setFrontPage , setCertificateData}) => {
 
     const fetchCertificateData = async (regNo,DOB) => {
       try {
-        const REG_DOB = regNo + ',' + DOB;
-        const response = await axios.get(`/api/getData/${REG_DOB}`)
+        const REG_DOB = regNo + ',' + DOB +',' + session;
+        // const response = await axios.get(`/api/getData/${REG_DOB}`)
+        const response = await axios.get(`http://localhost:4000/getData/${REG_DOB}`)
+        
         if (response.data.success) {
           setCertificateData(response.data.data);
           return false;
@@ -61,12 +65,12 @@ const FrontPage = ({setFrontPage , setCertificateData}) => {
       <div className="p-4 flex items-center justify-between bg-blue-600">
         <div className="flex items-center w-full">
           <img src={logo} alt="CT University Logo" className="w-10 sm:w-[65px] sm:ml-5" />
-          <h1 className="text-xl font-bold text-white text-center flex-grow text-[10px] sm:text-[20px]">CT University Results : ETE June 2024</h1>
+          <h1 className="text-xl font-bold text-white text-center flex-grow text-[10px] sm:text-[20px]">CT University Results</h1>
         </div>
       </div>
       {/* Main content section */}
-      <div className="flex items-center w-[70%] md:w-[30%] justify-center top-[50%] left-[50%] -translate-x-1/2 -translate-y-1/2 absolute ">
-        
+      <div className="flex flex-col items-center w-[70%] md:w-[30%] justify-center top-[50%] left-[50%] -translate-x-1/2 -translate-y-1/2 absolute ">
+        <SelectSession setSession={setSession}/>
         <div className="bg-white p-8 rounded shadow-md w-full max-w-sm">
             
           <div className="mb-4 p-2">

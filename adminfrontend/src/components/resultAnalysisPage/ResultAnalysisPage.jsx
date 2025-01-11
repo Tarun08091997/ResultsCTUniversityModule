@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import axios from 'axios';
 import './ResultAnalysisPage.css';
 import { HOST } from '../constants';
-const ResultAnalysisPage = ({ setData, data , error, setFrontPage }) => {
+const ResultAnalysisPage = ({ setData, data , error, setFrontPage , selectedSession}) => {
   const [schoolName, setSchoolName] = useState(data[0].COLLEGE);
   const [course, setCourse] = useState(data[0].COURSE);
   const [totalSubjects, setTotalSubjects] = useState(data[0].subjectCodes.length);
@@ -31,7 +31,7 @@ const ResultAnalysisPage = ({ setData, data , error, setFrontPage }) => {
 
     // Send the data to the server
     try {
-      const response = await axios.post(`${HOST}/addResult`, updatedData, {
+      const response = await axios.post(`${HOST}/addResult`, {"data":updatedData , "session":selectedSession}, {
         headers: {
           'Content-Type': 'application/json',
         },
@@ -54,6 +54,7 @@ const ResultAnalysisPage = ({ setData, data , error, setFrontPage }) => {
   return (
     <div className="result-analysis-page">
       {/* Top section with input fields */}
+      <div style={{fontWeight:'bold' , fontSize:'20px' , marginBottom:'15px'}}>{selectedSession}</div>
       <div className="input-section">
         <div className="input-group">
           <label>School Name</label>

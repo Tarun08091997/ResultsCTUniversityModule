@@ -8,6 +8,7 @@ function App() {
   const [data,setData] = useState([]);
   const [frontPage,setFrontPage] = useState(true);
   const [login , setLogin] = useState(false);
+  const [selectedSession, setSelectedSession] = useState("Create New Session");
 
   // useEffect(()=>{
   //   console.log(data);
@@ -20,8 +21,8 @@ function App() {
       {login && 
         <div>
           {/* <FetchDataButton /> */}
-          {frontPage && <AdminFrontPage setData = {setData} setFrontPage={setFrontPage}/> }
-          {!frontPage && <ResultAnalysisPage setData = {setData}  data= {data.data} error={data.error} setFrontPage={setFrontPage}/>}
+          {frontPage && <AdminFrontPage setData = {setData} setFrontPage={setFrontPage} setSelectedSession={setSelectedSession} selectedSession = {selectedSession}/> }
+          {!frontPage && <ResultAnalysisPage setData = {setData}  data= {data.data} error={data.error} setFrontPage={setFrontPage} selectedSession = {selectedSession}/>}
         </div>
       }
     </div>

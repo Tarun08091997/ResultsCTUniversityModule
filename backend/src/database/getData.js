@@ -1,11 +1,11 @@
 const mysql = require('mysql2/promise');
 const { checkAuthenticity } = require('../checkAuthenticity');
-const { getConnection } = require('./dataBaseConnection');
-
-
+const { getConnection, createTable } = require('./dataBaseConnection');
+const fs = require('fs').promises;
 
 exports.getDataMiddleware = async (req, res, next) => {
   const body = req.params.REG_DOB.split(',');
+  console.log(body);
 
   let connection;
   try {
@@ -18,9 +18,10 @@ exports.getDataMiddleware = async (req, res, next) => {
       }
 
       const regNo = body[0];
+      const session = body[2];
 
       // Query to fetch data based on enrollment number
-      const query = 'SELECT * FROM result WHERE enrollment_no = ?';
+      const query = `SELECT * FROM ${session} WHERE enrollment_no = ?`;
       const [rows] = await connection.query(query, [regNo]);
 
       // Check if data exists for the given enrollment number
@@ -58,71 +59,91 @@ exports.getDataMiddleware = async (req, res, next) => {
   }
 };
 
-exports.getDataExamination = async(req,res,next)=>{
+
+exports.getDataExamination = async (req, res, next) => {
     const RegNo = req.params.RegNo;
+    const { session } = req.body;
 
-  let connection;
-  try {
-      // Get a connection from the pool
-      connection = await getConnection();
+    let connection;
 
-      // Get DOB data
-      const dobQuery = 'SELECT * FROM dobdata WHERE REG = ?'
-      const [dobData] = await connection.query(dobQuery, [RegNo]);
+    try {
+        // Get a connection from the pool
+        connection = await getConnection();
 
-      const result = {
-        DOBDATA : {success:false},
-        RESULTDATA:{success:false}
-      }
-      
-      // If we have DOB Data
-      if(dobData.length != 0){
-        result.DOBDATA = {
-            success : true,
-            DOB:dobData[0].DOB
+        // Initialize the result object
+        const result = {
+            DOBDATA: { success: false },
+            RESULTDATA: { success: false }
+        };
+
+        // Query to get DOB data
+        const dobQuery = 'SELECT * FROM dobdata WHERE REG = ?';
+        const [dobData] = await connection.query(dobQuery, [RegNo]);
+
+        // If DOB data exists
+        if (dobData.length > 0) {
+            result.DOBDATA = {
+                success: true,
+                DOB: dobData[0].DOB
+            };
         }
-      }
 
-     
-      // Query to fetch data based on enrollment number
-      const query = 'SELECT * FROM result WHERE enrollment_no = ?';
-      const [rows] = await connection.query(query, [RegNo]);
+        // Query to fetch examination data (ensure table exists)
+        const query = `SELECT * FROM ?? WHERE enrollment_no = ?`;
+        const [rows] = await connection.query(query, [session, RegNo]);
 
-      // Check if data exists for the given enrollment number
-      if (rows.length === 0) {
-          return res.json(result);
-      }
+        // If no examination data exists
+        if (rows.length === 0) {
+            return res.status(200).json(result);
+        }
 
-      // Assuming there's only one result since enrollment number is unique
-      const data = rows[0];
+        // Construct response for the examination data
+        const data = rows[0];
+        result.RESULTDATA = {
+            success: true,
+            ENROLLMENT_NO: RegNo,
+            STUDENT_NAME: data.student_name,
+            COLLEGE: data.college,
+            COURSE: data.course,
+            SEMESTER: data.semester,
+            SUBJECT_CODES: data.subject_codes,
+            SUBJECTS: data.subjects,
+            GPS: data.gps,
+            CREDITS: data.credits,
+            GRADES: data.grades,
+            STATUS: data.status,
+            PERCENTAGE: data.percentage,
+            SGPA: data.sgpa,
+            EXAM_MONTH_YEAR: data.exam_month_year
+        };
 
-      // Construct the response object as needed
-      const responseData = {
-          success:true,
-          ENROLLMENT_NO: RegNo,
-          STUDENT_NAME: data.student_name,
-          COLLEGE: data.college,
-          COURSE: data.course,
-          SEMESTER: data.semester,
-          SUBJECT_CODES: data.subject_codes,
-          SUBJECTS: data.subjects,
-          GPS: data.gps,
-          CREDITS: data.credits,
-          GRADES: data.grades,
-          STATUS: data.status,
-          PERCENTAGE: data.percentage,
-          SGPA: data.sgpa,
-          EXAM_MONTH_YEAR: data.exam_month_year
-      };
+        res.status(200).json(result);
 
-      result.RESULTDATA = responseData;
-      res.json(result);
-  } catch (error) {
-      console.error('Error fetching data:', error);
-  } finally {
-      if (connection) connection.release(); // Release the connection back to the pool
-  }
-}
+    } catch (error) {
+        if (error.code === 'ER_NO_SUCH_TABLE') {
+            console.error(`Table "${session}" does not exist:`, error);
+
+            // Send a specific error response for missing table
+            res.status(400).json({
+                success: false,
+                message: `The session "${session}" does not exist. Please provide a valid session.`,
+            });
+        } else {
+            console.error('Error fetching data:', error);
+
+            // Generic error response
+            res.status(500).json({
+                success: false,
+                message: 'An error occurred while fetching the data. Please try again later.',
+                error: error.message
+            });
+        }
+    } finally {
+        // Ensure the connection is released back to the pool
+        if (connection) connection.release();
+    }
+};
+
 
 exports.updateDateOfBirth = async (req, res, next) => {
     const { REG, DOB } = req.body;
@@ -153,3 +174,51 @@ exports.updateDateOfBirth = async (req, res, next) => {
         if (connection) connection.release(); // Release the connection back to the pool
     }
 };
+
+
+exports.getResultSessions = async (req, res, next) => {
+    try {
+        // const filePath = path.join(__dirname, './constants.json'); // Adjust the relative path based on file location
+        const data = await fs.readFile('./constants.json', 'utf8');
+        const obj = JSON.parse(data);
+        res.status(200).json(obj);
+    } catch (err) {
+        res.status(400).json({"message":"Error while reading File" , "error" : err}) // Pass the error to the error-handling middleware
+    }
+};
+
+
+exports.addResultSessions = async (req, res, next) => {
+    try {
+        console.log("data")
+        // Read the existing data from constants.json
+        const data = await fs.readFile('./constants.json', 'utf8');
+        const obj = JSON.parse(data);
+
+        // Validate if "sessions" exists and is an array
+        if (!Array.isArray(obj.sessions)) {
+            return res.status(400).json({ message: "Invalid data format in constants.json" });
+        }
+
+        // Get the new session from the request body
+        const { newSession } = req.body;
+        if (!newSession || typeof newSession !== 'string') {
+            return res.status(400).json({ message: "Invalid input: newSession must be a non-empty string" });
+        }
+
+        createTable(newSession);
+
+        // Add the new session at the beginning of the sessions array
+        obj.sessions.unshift(newSession);
+
+        // Write the updated object back to constants.json
+        await fs.writeFile('./constants.json', JSON.stringify(obj, null, 2), 'utf8');
+
+        // Respond with the updated sessions
+        res.status(200).json({ message: "Session added successfully", sessions: obj.sessions });
+    } catch (err) {
+        console.log("Error")
+        res.status(500).json({ message: "Error while updating sessions", error: err });
+    }
+};
+

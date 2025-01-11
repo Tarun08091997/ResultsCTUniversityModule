@@ -1,8 +1,12 @@
 const mysql = require('mysql2/promise'); // Ensure you have installed mysql2
 const { backupFunction } = require("./backupDatabase");
 
-async function insertResults(results) {
+async function insertResults(results,resultSession) {
     const pool = connectDatabase(); // Get MySQL connection pool
+
+    const year = resultSession.split("_")[0]
+    const term = resultSession.split("_")[1]
+    const yt = term + " , " + year;
 
     const connection = await pool.getConnection();
 
@@ -27,12 +31,12 @@ async function insertResults(results) {
                 status: item.status,
                 percentage: item.percentage,
                 sgpa: item.sgpa,
-                exam_month_year: "JUNE,2024"    //item['EXAMINATION M/YR'] || 
+                exam_month_year: yt   //item['EXAMINATION M/YR'] || 
             };
 
             // Insert the result record with ON DUPLICATE KEY UPDATE
             const insertQuery = `
-                INSERT INTO result SET ?
+                INSERT INTO ${resultSession} SET ?
                 ON DUPLICATE KEY UPDATE
                     student_name = VALUES(student_name),
                     college = VALUES(college),
