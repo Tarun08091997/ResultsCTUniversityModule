@@ -7,6 +7,7 @@ const CreateNewSession = ({ viewCreateNewSession, setViewCreateNewSession }) => 
   const [year, setYear] = useState("");
   const [term, setTerm] = useState("");
   const [examType, setExamType] = useState("");
+  const months = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"]
 
   const handleCreateSession = async () => {
     try {
@@ -107,8 +108,9 @@ const CreateNewSession = ({ viewCreateNewSession, setViewCreateNewSession }) => 
         }}
       >
         <option value="">Select Term</option>
-        <option value="summer">Summer Term</option>
-        <option value="winter">Winter Term</option>
+        {months.map((val,index)=>{
+          <option key={index}>{val}</option>
+        })}
       </select>
       <select
         value={examType}
@@ -123,8 +125,8 @@ const CreateNewSession = ({ viewCreateNewSession, setViewCreateNewSession }) => 
         }}
       >
         <option>Select Exam Type</option>
-        <option>mtt</option>
-        <option>ett</option>
+        <option>mte</option>
+        <option>ete</option>
         <option>reappear</option>
       </select>
       <div style={{ display: "flex", justifyContent: "space-between" }}>
