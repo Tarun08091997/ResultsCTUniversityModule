@@ -100,10 +100,10 @@ app.get('*', (req, res) => {
 // Create server
 // backupFunction();
 
-app.listen(process.env.PORT, '192.168.124.197', () => {
-    console.log(`Server is running on http://192.168.124.197:${process.env.PORT}`);
-});
-
-// app.listen(process.env.PORT, () => {
-//     console.log(`Server is running on http://localhost:${process.env.PORT}`);
+// app.listen(process.env.PORT, '192.168.124.197', () => {
+//     console.log(`Server is running on http://192.168.124.197:${process.env.PORT}`);
 // });
+
+app.listen(process.env.PORT, () => {
+    console.log(`Server is running on http://localhost:${process.env.PORT}`);
+});
