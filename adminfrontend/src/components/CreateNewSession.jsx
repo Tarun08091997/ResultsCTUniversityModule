@@ -7,7 +7,7 @@ const CreateNewSession = ({ viewCreateNewSession, setViewCreateNewSession }) => 
   const [year, setYear] = useState("");
   const [term, setTerm] = useState("");
   const [examType, setExamType] = useState("");
-  const months = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"]
+  const months = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"];
 
   const handleCreateSession = async () => {
     try {
@@ -108,9 +108,9 @@ const CreateNewSession = ({ viewCreateNewSession, setViewCreateNewSession }) => 
         }}
       >
         <option value="">Select Term</option>
-        {months.map((val,index)=>{
+        {months.map((val,index)=>(
           <option key={index}>{val}</option>
-        })}
+        ))}
       </select>
       <select
         value={examType}

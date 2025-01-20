@@ -4,60 +4,87 @@ const { getConnection, createTable } = require('./dataBaseConnection');
 const fs = require('fs').promises;
 
 exports.getDataMiddleware = async (req, res, next) => {
-  const body = req.params.REG_DOB.split(',');
-  console.log(body);
-
-  let connection;
-  try {
-      // Get a connection from the pool
+    const body = req.params.REG_DOB.split(',');
+  
+    if (body.length !== 3) {
+      return res.json({ success: false, error: 'Invalid date of birth or registration number format.' });
+    }
+    
+    const regDOB = body[1];
+  
+    // Validate the date format (DD-MM-YYYY)
+    const dateParts = regDOB.split('-');
+    if (dateParts.length !== 3) {
+      return res.json({ success: false, error: 'Invalid date of birth format. Expected format: DD-MM-YYYY.' });
+    }
+  
+    const [d, m, y] = dateParts;
+  
+    // Check if year, month, and day are valid
+    if (!/^\d{4}$/.test(y) || !/^\d{2}$/.test(m) || !/^\d{2}$/.test(d)) {
+      return res.json({ success: false, error: 'Invalid year, month, or day format in date of birth.' });
+    }
+  
+    // Validate the month and day
+    if (m < 1 || m > 12) {
+      return res.json({ success: false, error: 'Invalid month in date of birth.' });
+    }
+  
+    // Days in each month (ignoring leap years for simplicity)
+    const daysInMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+    const maxDays = daysInMonth[m - 1];
+  
+    if (d < 1 || d > maxDays) {
+      return res.json({ success: false, error: 'Invalid day for the given month in date of birth.' });
+    }
+  
+    // Now that we've validated the date, proceed with the rest of the logic
+    let connection;
+    try {
       connection = await getConnection();
-
+  
       const resp = await checkAuthenticity(body, connection);
       if (!resp.login) {
-          return res.json({ success: false, error: 'Your Registration Number or Date Of Birth is wrong' });
+        return res.json({ success: false, error: 'Your Registration Number or Date Of Birth is wrong' });
       }
-
+  
       const regNo = body[0];
       const session = body[2];
-
-      // Query to fetch data based on enrollment number
+  
       const query = `SELECT * FROM ${session} WHERE enrollment_no = ?`;
       const [rows] = await connection.query(query, [regNo]);
-
-      // Check if data exists for the given enrollment number
+  
       if (rows.length === 0) {
-          return res.json({ success: false, error: 'Your result is still not declared. Kindly check after some days for further updates.' });
+        return res.json({ success: false, error: 'Your result is still not declared. Kindly check after some days for further updates.' });
       }
-
-      // Assuming there's only one result since enrollment number is unique
+  
       const data = rows[0];
-
-      // Construct the response object as needed
       const responseData = {
-          ENROLLMENT_NO: data.enrollment_no,
-          STUDENT_NAME: data.student_name,
-          COLLEGE: data.college,
-          COURSE: data.course,
-          SEMESTER: data.semester,
-          SUBJECT_CODES: data.subject_codes,
-          SUBJECTS: data.subjects,
-          GPS: data.gps,
-          CREDITS: data.credits,
-          GRADES: data.grades,
-          STATUS: data.status,
-          PERCENTAGE: data.percentage,
-          SGPA: data.sgpa,
-          EXAM_MONTH_YEAR: data.exam_month_year
+        ENROLLMENT_NO: data.enrollment_no,
+        STUDENT_NAME: data.student_name,
+        COLLEGE: data.college,
+        COURSE: data.course,
+        SEMESTER: data.semester,
+        SUBJECT_CODES: data.subject_codes,
+        SUBJECTS: data.subjects,
+        GPS: data.gps,
+        CREDITS: data.credits,
+        GRADES: data.grades,
+        STATUS: data.status,
+        PERCENTAGE: data.percentage,
+        SGPA: data.sgpa,
+        EXAM_MONTH_YEAR: data.exam_month_year
       };
-
+  
       res.json({ success: true, data: responseData });
-  } catch (error) {
+    } catch (error) {
       console.error('Error fetching data:', error);
       res.json({ success: false, error: 'Your result is still not declared. Kindly check after some days for further updates.' });
-  } finally {
+    } finally {
       if (connection) connection.release(); // Release the connection back to the pool
-  }
-};
+    }
+  };
+  
 
 
 exports.getDataExamination = async (req, res, next) => {
@@ -183,14 +210,14 @@ exports.getResultSessions = async (req, res, next) => {
         const obj = JSON.parse(data);
         res.status(200).json(obj);
     } catch (err) {
-        res.status(400).json({"message":"Error while reading File" , "error" : err}) // Pass the error to the error-handling middleware
+        console.log({"message":"Error while reading File" , "error" : err}) // Pass the error to the error-handling middleware
+        res.status(200).json({"message":"Data not found" , "error" : "Data not found"});
     }
 };
 
 
 exports.addResultSessions = async (req, res, next) => {
     try {
-        console.log("data")
         // Read the existing data from constants.json
         const data = await fs.readFile('./constants.json', 'utf8');
         const obj = JSON.parse(data);

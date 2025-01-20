@@ -9,17 +9,34 @@ const FrontPage = ({setFrontPage , setCertificateData}) => {
     const [msg , setMessage] = useState('Fill the Data Properly')
     const [trigger , setTrigger] = useState(false);
     const [session,setSession] = useState("");
+    const [disableSearch , setDisableSearch] = useState(true);
 
-    const handleDate = (date) =>{
-      const [y , m ,d] = date.split(/[\/.-]/);
+    
+
+    const handleDate = (date) => {
+      const [y, m, d] = date.split(/[\/.-]/);
+    
+      // Ensure valid year, month, and day
+      if (y.length !== 4 || m < 1 || m > 12 || d < 1 || d > 31) {
+        alert("Invalid date format or values!");
+        return;
+      }
+    
+      // Validate that the day exists for the given month
+      const isValidDate = new Date(`${y}-${m}-${d}`).getDate() == d;
+      if (!isValidDate) {
+        alert("Invalid day for the given month/year!");
+        return;
+      }
+    
       setDOB(`${d}-${m}-${y}`);
-    }
+    };
 
     const fetchCertificateData = async (regNo,DOB) => {
       try {
         const REG_DOB = regNo + ',' + DOB +',' + session;
-        // const response = await axios.get(`/api/getData/${REG_DOB}`)
-        const response = await axios.get(`http://localhost:4000/getData/${REG_DOB}`)
+        const response = await axios.get(`/api/getData/${REG_DOB}`)
+        // const response = await axios.get(`http://localhost:4000/getData/${REG_DOB}`)
         
         if (response.data.success) {
           setCertificateData(response.data.data);
@@ -48,7 +65,7 @@ const FrontPage = ({setFrontPage , setCertificateData}) => {
   }, [trigger, setTrigger]);
 
     const handleSearch = async () =>{
-        if(rollNo.length === 8){
+        if(rollNo.length === 8 || rollNo.length == 10){
             const frontPage = await fetchCertificateData(rollNo,dob);
             setFrontPage(frontPage);
         }
@@ -70,7 +87,7 @@ const FrontPage = ({setFrontPage , setCertificateData}) => {
       </div>
       {/* Main content section */}
       <div className="flex flex-col items-center w-[70%] md:w-[30%] justify-center top-[50%] left-[50%] -translate-x-1/2 -translate-y-1/2 absolute ">
-        <SelectSession setSession={setSession}/>
+        <SelectSession setDisableSearch={setDisableSearch} setSession={setSession}/>
         <div className="bg-white p-8 rounded shadow-md w-full max-w-sm">
             
           <div className="mb-4 p-2">
@@ -79,7 +96,7 @@ const FrontPage = ({setFrontPage , setCertificateData}) => {
               Registration Number
             </label>
             <input
-              type="number"
+              type="text"
               id="enrollment-number"
               className="w-full px-3 py-2 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
               placeholder="Enter your Registration number"
@@ -100,7 +117,8 @@ const FrontPage = ({setFrontPage , setCertificateData}) => {
 
           </div>
 
-          <button className="w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+          <button className={`w-full  text-white py-2 rounded ${disableSearch ? "bg-gray-500":" bg-blue-500 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"} `}
+          disabled={disableSearch}
           onClick={handleSearch}>
             Search
           </button>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import './ResultAnalysisPage.css';
 import { HOST } from '../constants';
@@ -50,6 +50,9 @@ const ResultAnalysisPage = ({ setData, data , error, setFrontPage , selectedSess
 
     setFrontPage(true);
   };
+  useEffect(()=>{
+    console.log("Data in Result Analysis :" , data);
+  },[])
 
   return (
     <div className="result-analysis-page">

@@ -13,7 +13,7 @@ export default function CheckResult({selectedSession}) {
 
       const handleSearch = async () => {
         // Check if registration number and session are valid
-        if (reg.length !== 8 || !selectedSession) {
+        if ((reg.length !== 8 && reg.length != 10) || !selectedSession) {
             alert("Please provide a valid Registration Number and select a session.");
             return;
         }
@@ -59,7 +59,7 @@ export default function CheckResult({selectedSession}) {
                 margin:0 ,
                 display:'flex'              
                 }}>
-            <input type='number' style={
+            <input type='text' style={
                 {
                     width:'85%',
                     border:'None',

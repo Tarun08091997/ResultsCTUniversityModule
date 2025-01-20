@@ -6,7 +6,7 @@ const {insertResults} = require('./src/database/insertResults')
 const {getDataMiddleware, getDataExamination, updateDateOfBirth, getResultSessions, addResultSessions} = require('./src/database/getData');
 const { checkConnection } = require('./src/database/dataBaseConnection');
 const { backupFunction } = require("./src/database/backupDatabase");
-
+const fs = require('fs').promises;
 
 app.use(cors());
 
@@ -16,6 +16,20 @@ app.use(bodyParser.json({ limit: '50mb' }));
 // Test the database connection and create table if not exists
 (async () => {
     await checkConnection();
+})();
+
+let resultSessionData = [];
+
+(async () =>{
+    try {
+        // const filePath = path.join(__dirname, './constants.json'); // Adjust the relative path based on file location
+        const data = await fs.readFile('./constants.json', 'utf8');
+        resultSessionData = JSON.parse(data).sessions;
+        console.log("Result " , resultSessionData)
+        
+    } catch (err) {
+        console.log({"message":"Error while reading File" , "error" : err}) // Pass the error to the error-handling middleware
+    }
 })();
 
 
@@ -36,7 +50,9 @@ app.post('/addFile', async (req, res, next) => {
             throw new Error('No CSV data provided');
         }
         
+        // console.log("CSV DATA : ", csvData);
         const data = await readCSV(csvData);
+        // console.log("readCSV DATA : ", data);
         const transformedData = await transformData(data);
         res.send(transformedData);
     } catch (error) {
@@ -84,10 +100,10 @@ app.get('*', (req, res) => {
 // Create server
 // backupFunction();
 
-// app.listen(process.env.PORT, '192.168.124.197', () => {
-//     console.log(`Server is running on http://192.168.124.197:${process.env.PORT}`);
-// });
-
-app.listen(process.env.PORT, () => {
-    console.log(`Server is running on http://localhost:${process.env.PORT}`);
+app.listen(process.env.PORT, '192.168.124.197', () => {
+    console.log(`Server is running on http://192.168.124.197:${process.env.PORT}`);
 });
+
+// app.listen(process.env.PORT, () => {
+//     console.log(`Server is running on http://localhost:${process.env.PORT}`);
+// });

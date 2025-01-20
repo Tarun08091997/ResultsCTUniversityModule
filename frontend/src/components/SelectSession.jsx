@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import axios from 'axios'
 import { useEffect } from "react";
-const SelectSession = ({ setSession }) => {
+const SelectSession = ({ setDisableSearch, setSession }) => {
   const [year, setYear] = useState("");
   const [term, setTerm] = useState("");
   const [examType, setExamType] = useState("");
@@ -12,8 +12,8 @@ const SelectSession = ({ setSession }) => {
 
   const fetchSession = async () => {
     try {
-      // const data = await axios.get("/api/getSessions");
-      const response = await axios.get("http://localhost:4000/getSessions");
+      const response = await axios.get("/api/getSessions");
+      // const response = await axios.get("http://localhost:4000/getSessions");
       const sessions = response.data.sessions;
       // Extract unique years, terms, and exam types
       const years = new Set();
@@ -23,8 +23,8 @@ const SelectSession = ({ setSession }) => {
       sessions.forEach((session) => {
         const [year, term, examType] = session.split('_');
         years.add(year);
-        terms.add(term.toLowerCase()); // Normalize case for consistency
-        examTypes.add(examType.toLowerCase()); // Normalize case for consistency
+        terms.add(term.toUpperCase()); // Normalize case for consistency
+        examTypes.add(examType.toUpperCase()); // Normalize case for consistency
       });
   
       // Update state with unique sorted values
@@ -40,11 +40,14 @@ const SelectSession = ({ setSession }) => {
   useEffect(()=>{
     fetchSession();
   },[]);
-  useEffect(()=>{
 
-    const selectedSession = `${year}_${term}_${examType}`;
+  useEffect(()=>{
+    
+    const selectedSession = `${year}_${term.toLowerCase()}_${examType.toLowerCase()}`;
+    if(year != "" && term != "" && examType != ""){
+      setDisableSearch(false);
+    }
     setSession(selectedSession);
-    console.log(selectedSession);
 
   },[year , term , examType])
 
@@ -87,13 +90,13 @@ const SelectSession = ({ setSession }) => {
       <select
         value={term}
         onChange={(e) => {
-          setTerm(e.target.value.split(" ")[0]);
+          setTerm(e.target.value);
         }}
         style={STYLE}
       >
-        <option value="">Select Term</option>
+        <option value="">Select Exam Month</option>
         {termList.map((val,index)=>(
-          <option key={index}>{val + " Term"}</option>
+          <option key={index}>{val}</option>
         ))}
       </select>
       <select

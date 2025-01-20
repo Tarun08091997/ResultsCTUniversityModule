@@ -7,6 +7,11 @@ export default function Certificate({ certificateData }) {
   const resStyle = "text-[10px] sm:text-[13px] font-bold mt-1 ml-[20%]";
   const tableValueStyle = "border border-gray-300 px-2 sm:px-4 py-2"
 
+  function capitalizeFirstLetter(str) {
+    if (str.length === 0) return str; // Handle empty strings
+    return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+  }
+
   const renderSubjectsTable = () => (
     <table className="w-full border-collapse border border-gray-300 mb-4 text-[10px] sm:text-[13px]">
       <thead>
@@ -46,7 +51,7 @@ export default function Certificate({ certificateData }) {
     <div id="printable-certificate" className=" p-6 border flex flex-col border-gray-300 rounded shadow-md items-center">
       <div className="flex justify-center relative w-full">
         <img src={image} alt="CT University Logo" className="md:w-[120px] w-[80px]" />
-        <p className="text-sm absolute top-[-5px] right-0 text-[12px] font-semibold">{certificateData.EXAM_MONTH_YEAR}</p>
+        <p className="text-sm absolute top-[-5px] right-0 text-[12px] font-semibold">{capitalizeFirstLetter(certificateData.EXAM_MONTH_YEAR)}</p>
       </div>
       <div className="text-center mb-4">
         <p className="sm:text-[15px] text-[13px] font-bold mt-2">{certificateData.COLLEGE}</p>
@@ -62,13 +67,13 @@ export default function Certificate({ certificateData }) {
           <p className={`${resStyle} text-left`}><span className={textStyle}>Semester:</span> {certificateData.SEMESTER}</p>
         </div>
       </div>
-      <p className="mb-2 text-center text-[10px] sm:text-[13px] font-semibold"><span className={textStyle}>Exam Year:</span> {certificateData.EXAM_MONTH_YEAR}</p>
+      <p className="mb-2 text-center text-[10px] sm:text-[13px] font-semibold"><span className={textStyle}>Exam Year:</span> {capitalizeFirstLetter(certificateData.EXAM_MONTH_YEAR)}</p>
       {renderSubjectsTable()}
       <p className={`font-bold ${certificateData.STATUS === 'PASS' ? 'text-green-500' : 'text-red-600'}`}>
         <span className="font-semibold text-black">Status:</span> {certificateData.STATUS}
       </p>
       <p className=' text-[12px] mt-4'>
-        *This is computer genrated result. For other purposes kindly get approvel from COE office
+        *This is computer genrated result. For official use kindly get approvel from COE office
       </p>
       
     </div>

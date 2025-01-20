@@ -83,7 +83,7 @@ exports.transformData = async (data) => {
             i++;
         }
 
-        checkError(item,'ENROLEMENT NO', true,item['ENROLEMENT NO']);
+        checkError(item,'ENROLEMENT NO', false,item['ENROLEMENT NO']);
         checkError(item,'STUDENT NAME', false,item['ENROLEMENT NO']);
         checkError(item,'STATUS', false,item['ENROLEMENT NO']);
         checkError(item,'% BASED ON SGPA', true,item['ENROLEMENT NO']);
