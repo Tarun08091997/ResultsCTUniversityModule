@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 import './ResultAnalysisPage.css';
 import { HOST } from '../constants';
+import ValidatedTextarea from './ValidatedTextarea';
 const ResultAnalysisPage = ({ setData, data , error, setFrontPage , selectedSession}) => {
   const [schoolName, setSchoolName] = useState(data[0].COLLEGE);
   const [course, setCourse] = useState(data[0].COURSE);
@@ -9,6 +10,9 @@ const ResultAnalysisPage = ({ setData, data , error, setFrontPage , selectedSess
   const [totalStudents, setTotalStudents] = useState(data.length);
   const [semester, setSemester] = useState(data[0].semester);
   const [examMonth, setExamMonth] = useState(data[0]['EXAMINATION M/YR']);
+  const [errorData , setErrorData] = useState({
+    
+  });
 
   const sendData = async () => {
     // Check if the input data has changed compared to the first student's data
@@ -61,11 +65,13 @@ const ResultAnalysisPage = ({ setData, data , error, setFrontPage , selectedSess
       <div className="input-section">
         <div className="input-group">
           <label>School Name</label>
-          <textarea type="text" value={schoolName} onChange={(e) => setSchoolName(e.target.value)} />
+          <ValidatedTextarea type = {'text'} name= "school" value = {schoolName} onChange = {setSchoolName} setError={setErrorData}/>
+          {/* <textarea type="text" value={schoolName} onChange={(e) => setSchoolName(e.target.value)} /> */}
         </div>
         <div className="input-group">
           <label>Course</label>
-          <textarea type="text" value={course} onChange={(e) => setCourse(e.target.value)} />
+          <ValidatedTextarea type = {'text'} name="course" value = {course} onChange = {setCourse} setError={setErrorData}/>
+          {/* <textarea type="text" value={course} onChange={(e) => setCourse(e.target.value)} /> */}
         </div>
         <div className="input-group">
           <label>Total Subjects</label>
@@ -76,16 +82,18 @@ const ResultAnalysisPage = ({ setData, data , error, setFrontPage , selectedSess
           <input type="number" value={totalStudents} disabled={true} onChange={(e) => setTotalStudents(e.target.value)} />
         </div>
         <div className="input-group">
-          <label>Semester</label>
-          <input type="text" value={semester} onChange={(e) => setSemester(e.target.value)} />
+          <label onClick={console.log(errorData)}>Semester</label>
+          <ValidatedTextarea type = {'text'} name="sem" value = {semester} onChange = {setSemester} setError={setErrorData}/>
+          {/* <input type="text" value={semester} onChange={(e) => setSemester(e.target.value)} /> */}
         </div>
         <div className="input-group">
           <label>Exam Month</label>
-          <input type="text" value={examMonth} onChange={(e) => setExamMonth(e.target.value)} />
+          <ValidatedTextarea type = {'text'} name="examMonth" value = {examMonth} onChange = {setExamMonth} setError={setErrorData}/>
+          {/* <input type="text" value={examMonth} onChange={(e) => setExamMonth(e.target.value)} /> */}
         </div>
       </div>
 
-      <label style={{font:'20px' , fontWeight:'bold' , color : 'red', margin:'10px'}}>Total Error : {error.total}</label>
+      <label style={{font:'20px' , fontWeight:'bold' , color : 'red', margin:'10px'}}>Total Error : {error.total + Object.values(errorData).reduce((a, item) => a + item, 0)}</label>
 
       {/* Data table section */}
       <div className="table-section">
@@ -143,7 +151,7 @@ const ResultAnalysisPage = ({ setData, data , error, setFrontPage , selectedSess
       {/* Buttons section */}
       <div className="button-section">
         <button onClick={() => { setFrontPage(true); setData([]); }}>Back</button>
-        {error.total == 0 && <button onClick={sendData}>Create</button>}
+        {error.total + Object.values(errorData).reduce((a, item) => a + item, 0) == 0 && <button onClick={sendData}>Create</button>}
       </div>
     </div>
   );

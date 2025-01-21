@@ -7,6 +7,7 @@ const {getDataMiddleware, getDataExamination, updateDateOfBirth, getResultSessio
 const { checkConnection } = require('./src/database/dataBaseConnection');
 const { backupFunction } = require("./src/database/backupDatabase");
 const fs = require('fs').promises;
+const rateLimit = require('express-rate-limit');
 
 app.use(cors());
 
@@ -18,23 +19,40 @@ app.use(bodyParser.json({ limit: '50mb' }));
     await checkConnection();
 })();
 
-let resultSessionData = [];
-
-(async () =>{
+async function loadData() {
     try {
-        // const filePath = path.join(__dirname, './constants.json'); // Adjust the relative path based on file location
-        const data = await fs.readFile('./constants.json', 'utf8');
-        resultSessionData = JSON.parse(data).sessions;
-        console.log("Result " , resultSessionData)
-        
+      const data = await fs.readFile('./constants.json', 'utf8');
+      const resultSessionData = JSON.parse(data).sessions;
+      return resultSessionData;
     } catch (err) {
-        console.log({"message":"Error while reading File" , "error" : err}) // Pass the error to the error-handling middleware
+      console.error({ message: "Error while reading File", error: err });
+      return [];
     }
-})();
+  }
+
+// Rate limiter for `/getData/:REG_DOB` endpoint
+const getDataLimiter = rateLimit({
+    windowMs: 5 * 60 * 1000, // 1-minute window
+    max: 5, // Limit each IP to 5 requests per window
+    message: {
+      success: false,
+      error: 'Too many requests from this IP, please try again after 5 minutes.',
+    },
+    standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+    legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+  });
 
 
 // Students Frontend
-app.get('/getData/:REG_DOB', getDataMiddleware);
+app.get('/getData/:REG_DOB', async(req,res,next)=>{
+    console.log(req.params.REG_DOB);
+    const session = req.params.REG_DOB.split(',')[2];
+    const resultSessionData = await loadData();
+    if(!resultSessionData.includes(session)){
+        return res.json({ success: false, error: 'write Session Properly' });
+    }
+    getDataMiddleware(req,res,next);
+});
 
 // app.get('/getData', async (req,res,next)=>{
 //     console.log("trigger");
@@ -98,7 +116,7 @@ app.get('*', (req, res) => {
 });
 
 // Create server
-// backupFunction();
+backupFunction();
 
 app.listen(process.env.PORT, '192.168.124.197', () => {
     console.log(`Server is running on http://192.168.124.197:${process.env.PORT}`);
