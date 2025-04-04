@@ -43,9 +43,11 @@ const getDataLimiter = rateLimit({
   });
 
 
+let count = 0;
 // Students Frontend
 app.get('/getData/:REG_DOB', async(req,res,next)=>{
-    console.log(req.params.REG_DOB);
+    count++;
+    console.log("count : " , count , " Data : " , req.params.REG_DOB , "Date" , new Date().toLocaleString());
     const session = req.params.REG_DOB.split(',')[2];
     const resultSessionData = await loadData();
     if(!resultSessionData.includes(session)){

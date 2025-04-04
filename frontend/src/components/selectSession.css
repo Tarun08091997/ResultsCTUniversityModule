@@ -1,0 +1,23 @@
+/* For large screens (desktop/tablets) */
+.select-session-container {
+    display: flex;
+    flex-direction: row; /* Row layout for larger screens */
+    gap: 15px;
+    justify-content: center;
+    flex-wrap: wrap;
+  }
+  
+  /* For small screens (mobile) */
+  @media (max-width: 500px) {
+    .select-session-container {
+      flex-direction: column; /* Stack the select elements in a column for mobile */
+      padding: 10px;
+    }
+  
+    .select-session-container select {
+      font-size: 14px;
+      padding: 10px;
+      margin-bottom: 10px; /* Adds some space between selects */
+    }
+  }
+  

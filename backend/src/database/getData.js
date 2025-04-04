@@ -31,7 +31,7 @@ exports.getDataMiddleware = async (req, res, next) => {
     }
   
     // Days in each month (ignoring leap years for simplicity)
-    const daysInMonth = [31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+    const daysInMonth = [31, 29, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
     const maxDays = daysInMonth[m - 1];
   
     if (d < 1 || d > maxDays) {
